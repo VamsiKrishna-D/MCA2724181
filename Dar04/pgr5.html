@@ -1,0 +1,61 @@
+<html>
+    <head>
+        <script>
+            function add()
+            {
+                var num1,num2,sum;
+                num1=parseInt(document.getElementById("txtFirstnumber").value);
+                num2=parseInt(document.getElementById("txtSecondnumber").value);
+                sum=num1+num2;
+                document.getElementById("txtAnswer").value=sum;
+            }
+            function sub()
+            {
+                var num1,num2,sub;
+                num1=parseInt(document.getElementById("txtFirstnumber").value);
+                num2=parseInt(document.getElementById("txtSecondnumber").value);
+                sub=num1-num2;
+                document.getElementById("txtAnswer").value=sub;
+            }
+            function di()
+            {
+                var num1,num2,di;
+                num1=parseInt(document.getElementById("txtFirstnumber").value);
+                num2=parseInt(document.getElementById("txtSecondnumber").value);
+                di=num1/num2;
+                document.getElementById("txtAnswer").value=di;
+            }
+            function mul()
+            {
+                var num1,num2,mul;
+                num1=parseInt(document.getElementById("txtFirstnumber").value);
+                num2=parseInt(document.getElementById("txtSecondnumber").value);
+                mul=num1*num2;
+                document.getElementById("txtAnswer").value=mul;
+            }
+            function clean()
+            {
+            
+                document.getElementById("txtFirstnumber").value="";
+                document.getElementById("txtSecondnumber").value="";
+                document.getElementById("txtAnswer").value="";
+            }
+            
+           
+            </script>
+    </head>
+    <body>
+           <p>First Number:<input id="txtFirstnumber"></p>
+           <p>Second Number:<input id="txtSecondnumber"></p>
+                <button onclick="add()">Add</button>
+                <button onclick="sub()">Sub</button>
+                <button onclick="mul()">Mul</button>
+                <button onclick="di()">Division</button>
+                <button onclick="clean()">Clear</button>
+                
+               
+                
+                <p>Ans=<input id="txtAnswer"></p>
+    </body>
+    </html>
+                

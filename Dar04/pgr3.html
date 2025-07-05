@@ -1,0 +1,43 @@
+<html>
+<head>
+    <style>
+        .container{
+            display: grid;   /*inline-grid*/
+           gap: 50px 100px; /*column-gap: 50px;*/
+                             /* row-gap: 50px;*/
+            grid-template-columns : auto auto auto;
+            background-color: dodgerblue;
+            padding: 10px;
+        }
+        .container > div{
+            background-color: #f1f1f1;
+            border: 1px solid black;
+            padding: 10px;
+            font-size: 30px;
+            text-align: center;
+        }
+        .item{
+            /*grid-row:1/span 2;    /* grid-column:1/span 2;    */
+            /*grid-column-start: 1;
+            grid-column-end: 4;    */
+            grid-row-start: 1;
+            grid-row-end: 4;
+        }
+        </style>
+        </head>
+        <body>
+            <h1>Grid Layout</h1>
+            <h2><p>A grid layout must have a parent element with the<em>display</em>property set to <em>grid</em>inline-grid</p></h2>
+        <div class="container">
+            <div class="item">1</div>
+            <div>2</div>
+            <div>3</div>
+            <div>4</div>
+            <div>5</div>
+            <div>6</div>
+            <div>7</div>
+            <div>8</div>
+        </div>
+        </body>
+</html>
+
