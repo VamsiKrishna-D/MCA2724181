@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible"
+          content="IE=edge">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>
+        Build a Survey Form using HTML and CSS
+    </title>
+ 
+    <style>
+  /* Styling the Body element i.e. Color,        Font, Alignment */
+        body {
+            background-color:white;
+            font-family: Verdana;
+            text-align: center;
+        }
+         /* Styling the Form (Color, Padding, Shadow) */
+        form {
+            background-color: #eee8e8;
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 30px 20px;
+            box-shadow: 2px 5px 10px rgba(0, 0, 0, 0.5);
+        }
+         /* Styling form-control Class */
+        .form-control {
+            text-align: left;
+            margin-bottom: 25px;
+        }
+.
+        /* Styling form-control Label */
+        .form-control label {
+            display: block;
+            margin-bottom: 10px;
+        }
+ 
+        /* Styling form-control input,
+        select, textarea */
+        .form-control input,
+        .form-control select,
+        .form-control textarea {
+            border: 1px solid #777;
+            border-radius: 2px;
+            font-family: inherit;
+            padding: 10px;
+            display: block;
+            width: 40%;
+        }
+ 
+        /* Styling form-control Radio
+        button and Checkbox */
+        .form-control input[type="radio"],
+        .form-control input[type="checkbox"] {
+            display: inline-block;
+            width: auto;
+        }
+        .forms-control {
+        display: grid;
+    grid-template-columns: 1fr 1fr; 
+    gap: 10px 20px; 
+    max-width: 300px; 
+    margin-top: 5px;
+        }
+        /* Styling Button */
+        button {
+            background-color: #5628d6;
+            border: 1px solid #777;
+            border-radius: 2px;
+            font-family: inherit;
+            font-size: 21px;
+            display: block;
+            width: 20%;
+            margin-top: 50px;
+            margin-bottom: 20px;
+        }
+        
+    </style>
+</head>
+  
+<body>
+    <h1>Feedback Form</h1>
+  
+    <!-- Create Form -->
+    <form id="form">
+ 
+        <!-- Details -->
+        <div class="form-control">
+            <label for="name" id="label-name">
+                Faculty Name:
+            </label>
+ 
+            <!-- Input Type Text -->
+            <input type="text"
+                   id="name"
+                   placeholder="Enter your name" />
+        </div>
+  
+        <div class="form-control">
+            <label for="email" id="label-email">
+                Email
+            </label>
+ 
+            <!-- Input Type Email-->
+            <input type="email"
+                   id="email"
+                   placeholder="Enter email" />
+        </div>
+  
+        <div class="form-control">
+            <label for="role" id="label-role">
+                Training Attended:
+            </label>
+             
+            <!-- Dropdown options -->
+            <select name="role" id="role">
+                <option value="student">--Select Training--</option>
+                <option value="intern">Java Fullstack</option>
+                <option value="professional">
+                    Python Fullstack
+                </option>
+                <option value="other">Others</option>
+            </select>
+        </div>
+        
+  
+        <div class="forms-control">
+            <label>
+                Overall Rating:
+            </label><br>
+ 
+            <!-- Input Type Radio Button -->
+            <label for="recommed-1">
+                <input type="radio"
+                       id="recommed-1"
+                       name="recommed">Excellent</input>
+            </label>
+           <label for="recommed-2">
+                <input type="radio"
+                       id="recommed-2"
+                       name="recommed">Good</input><br>
+            </label>
+            <label for="recommed-3">
+                <input type="radio"
+                       id="recommed-3"
+                       name="recommed">Average</input>
+            </label>
+            <label for="recommed-3">
+                <input type="radio"
+                       id="recommed-3"
+                       name="recommed">Poor</input><br>
+            </label>
+        </div>
+  
+        <div class="forms-control">
+            <label>Topic Covered:
+            </label><br>
+            <!-- Input Type Checkbox -->
+            <label for="inp-3">
+                <input type="checkbox"
+                       name="inp">Content Qulity</input></label>
+            <label for="inp-4">
+                <input type="checkbox"
+                       name="inp">Delivery</input></label>
+            <label for="inp-5">
+                <input type="checkbox"
+                       name="inp">Interaction</input></label>
+            <label for="inp-6">
+                <input type="checkbox"
+                       name="inp">Relevance</input></label><br>
+            
+            <!--<label for="inp-7">
+                <input type="checkbox"
+                       name="inp">Django</input></label><br>
+            <label for="inp-8">
+                <input type="checkbox"
+                       name="inp">CSS</input></label><br>-->
+        </div>
+  
+        <div class="form-control">
+            <label for="comment">
+                Suggestions/Comments:
+            </label>
+ 
+            <!-- multi-line text input control -->
+            <textarea name="comment" id="comment"
+                placeholder="Enter your comment">
+            </textarea>
+        </div>
+  
+        <!-- Multi-line Text Input Control -->
+        <button type="submit" value="submit">
+            Submit
+        </button>
+    </form>
+    <script>
+        
+    document.getElementById("form").addEventListener("submit", function(event) {
+        event.preventDefault();
+        
+        
+        const name = document.getElementById("name").value;
+        const email = document.getElementById("email").value;
+        const training = document.getElementById("role").value;
+
+       
+        let rating = "";
+        const ratingOptions = document.getElementsByName("recommed");
+        for (const option of ratingOptions) {
+            if (option.checked) {
+                rating = option.parentElement.innerText;
+                break;
+            }
+        }
+
+       
+        const topicCheckboxes = document.querySelectorAll("input[name='inp']:checked");
+        const topics = Array.from(topicCheckboxes).map(cb => cb.parentElement.innerText).join(", ");
+
+        
+        const comment = document.getElementById("comment").value.trim();
+
+        
+        const message = `
+Thank you! Your feedback has been submitted.
+
+Here are the details:
+ -->Name: ${name}
+ -->Email: ${email}
+ -->Training Attended: ${training}
+ -->Rating: ${rating}
+ -->Topics Covered: ${topics}
+ -->Comments: ${comment || "None"}
+        `;
+
+        alert(message);
+
+        
+        this.reset();
+    });
+
+   /* document.getElementById("form").addEventListener("submit", function(event) {
+        event.preventDefault();
+        alert("Thank you! Your feedback has been submitted.");
+        
+        
+        this.reset();
+    });*/
+</script>
+</body>
+</html>
