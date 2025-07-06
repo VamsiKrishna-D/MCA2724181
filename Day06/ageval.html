@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Faculty Details</title>
+  <style>
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #333; padding: 8px; text-align: left; }
+    .error { color: red; font-size: 0.9em; }
+    button.delete-btn { background: crimson; color: white; border: none; padding: 4px 8px; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <h2>Enter Faculty Details</h2>
+  <form id="facForm">
+    <label>Name: <input type="text" id="facName" required></label><br>
+    <label>College: <input type="text" id="facDep" required></label><br>
+    <label>Course: <input type="text" id="facSub" required></label><br>
+    <label>Age: <input type="number" id="facAge" required></label>
+    <span class="error" id="ageError"></span><br>
+    <label>Place: <input type="text" id="facPlace" required></label><br><br>
+    <button type="submit">Submit</button>
+  </form>
+
+  <h2>Faculty List</h2>
+  <table id="facList">
+    <thead>
+      <tr><th>Name</th><th>College</th><th>Course</th><th>Age</th><th>Place</th><th>Action</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+<script>
+document.getElementById('facForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const name = document.getElementById('facName').value.trim();
+  const dep = document.getElementById('facDep').value.trim();
+  const sub = document.getElementById('facSub').value.trim();
+  const age = parseInt(document.getElementById('facAge').value, 10);
+  const place = document.getElementById('facPlace').value.trim();
+  const ageError = document.getElementById('ageError');
+
+  // Validate age range
+  if (isNaN(age) || age < 18 || age > 70) {
+    ageError.textContent = 'Age must be between 18 and 70';
+    return;
+  }
+  ageError.textContent = '';
+
+  const tbody = document.getElementById('facList').querySelector('tbody');
+  const row = tbody.insertRow();
+  row.insertCell().textContent = name;
+  row.insertCell().textContent = dep;
+  row.insertCell().textContent = sub;
+  row.insertCell().textContent = age;
+  row.insertCell().textContent = place;
+
+  const actionCell = row.insertCell();
+  const delBtn = document.createElement('button');
+  delBtn.textContent = 'Delete';
+  delBtn.className = 'delete-btn';
+  delBtn.addEventListener('click', () => row.remove());
+  actionCell.appendChild(delBtn);
+
+  // Reset form fields
+  this.reset();
+});
+</script>
+</body>
+</html>
