@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head><title>Add Student</title></head>
+<body>
+    <h2>Add New Student</h2>
+    <form method="post">
+        {% csrf_token %}
+        Roll No: <input type="number" name="rollno"><br><br>
+        Name: <input type="text" name="name"><br><br>
+        Marks: <input type="text" name="marks"><br><br>
+        <input type="submit" value="Add Student">
+        <a href="{% url 'list_students' %}">Cancel</a>
+    </form>
+</body>
+</html>
