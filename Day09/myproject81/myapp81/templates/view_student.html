@@ -1,0 +1,31 @@
+{%   extends  "master.html"  %}
+{%  block content  %}
+<style>
+   table{        margin-top: 100px;         margin-left: 250px; }
+ </style>
+<h1>Welcome To Student  Data</h1>
+<table border="1">
+<tr style="font-size: 20px;">
+
+<th>Name</th>
+<th>Course</th>
+<th>Ht_No</th>
+<th>Mobile</th>
+<th>Period of Validity</th>
+
+</tr>
+{%  for  x  in  data  %}
+<tr style="font-size: 16px;">
+
+<td>{{x.name}}</td>
+<td>{{x.course}}</td>
+<td>{{x.ht_no}}</td>
+<td>{{x.mobile}}</td>
+<td>{{x.pov}}</td>
+
+</tr>
+{% endfor %}
+</table>
+<br>
+</form>
+ {% endblock %}
