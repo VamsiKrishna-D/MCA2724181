@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Member List</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 40%;
+            margin-top: 20px;
+            padding:20px;
+            
+        }
+        th, td {
+            border: 1px solid gray;
+            padding: 10px;
+            text-align: left;
+
+        }
+       
+    </style>
+</head>
+<body bgcolor=lightgreen>
+    <h3>Members List :</h3>
+    <table border=3 >
+        <tr>
+            <th>id</th>
+            <th>firstname</th>
+            <th>lastname</th>
+            <th>phone</th>
+            <th>joined_date</th>
+        </tr>
+        {% for member in members %}
+        <tr>
+            <td>{{ member.id }}</td>
+            <td>{{ member.firstname }}</td>
+            <td>{{ member.lastname }}</td>
+            <td>{{ member.phone }}</td>
+            <td>{{ member.joined_date }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

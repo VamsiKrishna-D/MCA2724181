@@ -1,0 +1,343 @@
+Step 1: Create Django Project
+
+django-admin startproject memberproject
+cd memberproject
+
+
+---
+
+🔹 Step 2: Create Django App
+
+python manage.py startapp members
+
+
+---
+
+🔹 Step 3: Register App in settings.py
+
+In memberproject/settings.py, add 'members', to INSTALLED_APPS:
+
+INSTALLED_APPS = [
+    ...
+    'members',
+]
+
+
+---
+
+🔹 Step 4: Create Member Model
+
+In members/models.py:
+
+from django.db import models
+
+class Member(models.Model):
+    firstname = models.CharField(max_length=100)
+    lastname = models.CharField(max_length=100)
+    phone = models.CharField(max_length=20)
+    joined_date = models.DateField()
+
+    def _str_(self):
+        return f"{self.firstname} {self.lastname}"
+
+
+---
+
+🔹 Step 5: Make Migrations & Migrate
+
+python manage.py makemigrations
+python manage.py migrate
+
+
+---
+
+🔹 Step 6: Add Sample Data (via Admin or Shell)
+
+Enable admin in members/admin.py:
+
+from django.contrib import admin
+from .models import Member
+
+admin.site.register(Member)
+
+Create superuser:
+
+python manage.py createsuperuser
+
+Then run server:
+
+python manage.py runserver
+
+Log in at http://127.0.0.1:8000/admin/ and add members manually.
+
+
+---
+
+🔹 Step 7: Create View to Display Member List
+
+In members/views.py:
+
+from django.shortcuts import render
+from .models import Member
+
+def member_list(request):
+    members = Member.objects.all()
+    return render(request, 'members/member_list.html', {'members': members})
+
+
+---
+
+🔹 Step 8: Create URL Configuration
+
+In members/urls.py (create the file if not there):
+
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('', views.member_list, name='member_list'),
+]
+
+In memberproject/urls.py, include the app URLs:
+
+from django.contrib import admin
+from django.urls import path, include
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', include('members.urls')),
+]
+
+
+---
+
+🔹 Step 9: Create HTML Template
+
+Create folder members/templates/members/ and inside it create member_list.html:
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Member List</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 70%;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid gray;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: lightgray;
+        }
+    </style>
+</head>
+<body>
+    <h3>Member :</h3>
+    <table>
+        <tr>
+            <th>id</th>
+            <th>firstname</th>
+            <th>lastname</th>
+            <th>phone</th>
+            <th>joined_date</th>
+        </tr>
+        {% for member in members %}
+        <tr>
+            <td>{{ member.id }}</td>
+            <td>{{ member.firstname }}</td>
+            <td>{{ member.lastname }}</td>
+            <td>{{ member.phone }}</td>
+            <td>{{ member.joined_date }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
+
+
+---
+
+🔟 Step 10: Run the Server
+
+python manage.py runserver
+
+Visit http://127.0.0.1:8000/ to view your Member table.
+
+
+---✅ Step-by-Step Django Code for Member List Display
+
+
+---
+
+🔹 Step 1: Create Django Project
+
+django-admin startproject memberproject
+cd memberproject
+
+
+---
+
+🔹 Step 2: Create Django App
+
+python manage.py startapp members
+
+
+---
+
+🔹 Step 3: Register App in settings.py
+
+In memberproject/settings.py, add 'members', to INSTALLED_APPS:
+
+INSTALLED_APPS = [
+    ...
+    'members',
+]
+
+
+---
+
+🔹 Step 4: Create Member Model
+
+In members/models.py:
+
+from django.db import models
+
+class Member(models.Model):
+    firstname = models.CharField(max_length=100)
+    lastname = models.CharField(max_length=100)
+    phone = models.CharField(max_length=20)
+    joined_date = models.DateField()
+
+    def _str_(self):
+        return f"{self.firstname} {self.lastname}"
+
+
+---
+
+🔹 Step 5: Make Migrations & Migrate
+
+python manage.py makemigrations
+python manage.py migrate
+
+
+---
+
+🔹 Step 6: Add Sample Data (via Admin or Shell)
+
+Enable admin in members/admin.py:
+
+from django.contrib import admin
+from .models import Member
+
+admin.site.register(Member)
+
+Create superuser:
+
+python manage.py createsuperuser
+
+Then run server:
+
+python manage.py runserver
+
+Log in at http://127.0.0.1:8000/admin/ and add members manually.
+
+
+---
+
+🔹 Step 7: Create View to Display Member List
+
+In members/views.py:
+
+from django.shortcuts import render
+from .models import Member
+
+def member_list(request):
+    members = Member.objects.all()
+    return render(request, 'members/member_list.html', {'members': members})
+
+
+---
+
+🔹 Step 8: Create URL Configuration
+
+In members/urls.py (create the file if not there):
+
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('', views.member_list, name='member_list'),
+]
+
+In memberproject/urls.py, include the app URLs:
+
+from django.contrib import admin
+from django.urls import path, include
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', include('members.urls')),
+]
+
+
+---
+
+🔹 Step 9: Create HTML Template
+
+Create folder members/templates/members/ and inside it create member_list.html:
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Member List</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 70%;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid gray;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: lightgray;
+        }
+    </style>
+</head>
+<body>
+    <h3>Member :</h3>
+    <table>
+        <tr>
+            <th>id</th>
+            <th>firstname</th>
+            <th>lastname</th>
+            <th>phone</th>
+            <th>joined_date</th>
+        </tr>
+        {% for member in members %}
+        <tr>
+            <td>{{ member.id }}</td>
+            <td>{{ member.firstname }}</td>
+            <td>{{ member.lastname }}</td>
+            <td>{{ member.phone }}</td>
+            <td>{{ member.joined_date }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
+
+
+---
+
+🔟 Step 10: Run the Server
+
+python manage.py runserver
+
+Visit http://127.0.0.1:8000/ to view your Member table.
