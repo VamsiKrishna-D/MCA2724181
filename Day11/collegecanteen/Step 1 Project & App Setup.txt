@@ -1,0 +1,220 @@
+Step 1: Project & App Setup
+If you haven’t created the project/app yet:
+
+
+django-admin startproject collegecanteen
+cd collegecanteen
+python manage.py startapp catalog
+Step 2: Register app and media in settings.py
+Add 'catalog' to INSTALLED_APPS:
+
+
+INSTALLED_APPS = [
+    # ...
+    'catalog',
+]
+Add media file settings at the bottom:
+
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+Step 3: Define FoodItem model in catalog/models.py
+
+from django.db import models
+
+class FoodItem(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    price = models.DecimalField(max_digits=6, decimal_places=2)
+    image = models.ImageField(upload_to='food/', blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+Step 4: Migrate DB
+
+
+python manage.py makemigrations
+python manage.py migrate
+
+Step 5: Register model in admin (catalog/admin.py)
+
+
+from django.contrib import admin
+from .models import FoodItem
+
+admin.site.register(FoodItem)
+
+Step 6: Create form (catalog/forms.py)
+
+
+from django import forms
+from .models import FoodItem
+
+class FoodItemForm(forms.ModelForm):
+    class Meta:
+        model = FoodItem
+        fields = ['name', 'description', 'price', 'image']
+
+Step 7: Views for CRUD (catalog/views.py)
+
+
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import FoodItem
+from .forms import FoodItemForm
+
+def food_list(request):
+    items = FoodItem.objects.all()
+    return render(request, 'food_list.html', {'items': items})
+
+def food_detail(request, pk):
+    item = get_object_or_404(FoodItem, pk=pk)
+    return render(request, 'food_detail.html', {'item': item})
+
+def food_create(request):
+    if request.method == 'POST':
+        form = FoodItemForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('food_list')
+    else:
+        form = FoodItemForm()
+    return render(request, 'food_form.html', {'form': form})
+
+def food_update(request, pk):
+    item = get_object_or_404(FoodItem, pk=pk)
+    if request.method == 'POST':
+        form = FoodItemForm(request.POST, request.FILES, instance=item)
+        if form.is_valid():
+            form.save()
+            return redirect('food_detail', pk=pk)
+    else:
+        form = FoodItemForm(instance=item)
+    return render(request, 'food_form.html', {'form': form})
+
+def food_delete(request, pk):
+    item = get_object_or_404(FoodItem, pk=pk)
+    if request.method == 'POST':
+        item.delete()
+        return redirect('food_list')
+    return render(request, 'food_confirm_delete.html', {'item': item})
+
+Step 8: URLs (catalog/urls.py)
+
+
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('', views.food_list, name='food_list'),
+    path('food/<int:pk>/', views.food_detail, name='food_detail'),
+    path('food/add/', views.food_create, name='food_create'),
+    path('food/<int:pk>/edit/', views.food_update, name='food_update'),
+    path('food/<int:pk>/delete/', views.food_delete, name='food_delete'),
+]
+In main collegecanteen/urls.py:
+
+
+
+from django.contrib import admin
+from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', include('catalog.urls')),
+]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+Step 9: Templates
+Create catalog/templates/ and add these files:
+
+food_list.html
+
+<!DOCTYPE html>
+<html>
+<head><title>Food Items</title></head>
+<body>
+    <h1>Food Items</h1>
+    <a href="{% url 'food_create' %}">➕ Add Food Item</a>
+    <ul>
+    {% for item in items %}
+        <li>
+            <a href="{% url 'food_detail' item.pk %}">{{ item.name }}</a> — Rs {{ item.price }} |
+            <a href="{% url 'food_update' item.pk %}">Edit</a> |
+            <a href="{% url 'food_delete' item.pk %}">Delete</a>
+        </li>
+    {% empty %}
+        <li>No food items available.</li>
+    {% endfor %}
+    </ul>
+</body>
+</html>
+
+food_detail.html
+
+
+<!DOCTYPE html>
+<html>
+<head><title>{{ item.name }}</title></head>
+<body>
+    <h1>{{ item.name }}</h1>
+    {% if item.image %}
+        <img src="{{ item.image.url }}" alt="{{ item.name }}" style="max-width:200px;">
+    {% endif %}
+    <p>{{ item.description }}</p>
+    <p>Price: Rs {{ item.price }}</p>
+
+    <a href="{% url 'food_update' item.pk %}">Edit</a> |
+    <a href="{% url 'food_delete' item.pk %}">Delete</a> |
+    <a href="{% url 'food_list' %}">Back to list</a>
+</body>
+</html>
+
+food_form.html
+
+
+
+<!DOCTYPE html>
+<html>
+<head><title>{% if form.instance.pk %}Edit{% else %}Add{% endif %} Food Item</title></head>
+<body>
+    <h1>{% if form.instance.pk %}Edit{% else %}Add{% endif %} Food Item</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save</button>
+    </form>
+    <a href="{% url 'food_list' %}">Back to list</a>
+</body>
+</html>
+
+food_confirm_delete.html
+
+
+<!DOCTYPE html>
+<html>
+<head><title>Delete Food Item</title></head>
+<body>
+    <h2>Are you sure you want to delete "{{ item.name }}"?</h2>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Yes, delete</button>
+        <a href="{% url 'food_detail' item.pk %}">Cancel</a>
+    </form>
+</body>
+</html>
+
+Step 10: Run server and test
+
+
+python manage.py runserver
+Open your browser:
+
+http://127.0.0.1:8000/ to see the food items list
+
+Add/Edit/Delete food items easily
+
+If you want, I can also help you with the exact files zipped or any extra features like search/filtering. Just ask!

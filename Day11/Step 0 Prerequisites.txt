@@ -1,0 +1,218 @@
+Step 0: Prerequisites
+You have Python and Django installed.
+
+You have created a Django project (let’s call it myproject).
+
+You created an app inside it called myapp.
+
+If not, run this first:
+
+bash
+Copy code
+django-admin startproject myproject
+cd myproject
+python manage.py startapp myapp
+Add 'myapp' to your myproject/settings.py under INSTALLED_APPS:
+
+python
+Copy code
+INSTALLED_APPS = [
+    ...
+    'myapp',
+]
+Step 1: Define the Student Model
+File: myapp/models.py
+
+python
+Copy code
+from django.db import models
+
+class Student(models.Model):
+    name = models.CharField(max_length=100)
+    roll_number = models.IntegerField(unique=True)
+    course = models.CharField(max_length=100)
+    enrollment_date = models.DateField()
+
+    def __str__(self):
+        return self.name
+Step 2: Apply Migrations
+bash
+Copy code
+python manage.py makemigrations
+python manage.py migrate
+Step 3: Register Student model in Admin (optional, but useful)
+File: myapp/admin.py
+
+python
+Copy code
+from django.contrib import admin
+from .models import Student
+
+admin.site.register(Student)
+You can create a superuser to access the admin:
+
+bash
+Copy code
+python manage.py createsuperuser
+Step 4: Create Class-Based Views for CRUD
+File: myapp/views.py
+
+python
+Copy code
+from django.views.generic import CreateView, ListView, UpdateView, DeleteView
+from django.urls import reverse_lazy
+from .models import Student
+
+class StudentCreateView(CreateView):
+    model = Student
+    fields = ['name', 'roll_number', 'course', 'enrollment_date']
+    template_name = 'student_form.html'
+    success_url = reverse_lazy('student_list')
+
+class StudentListView(ListView):
+    model = Student
+    context_object_name = 'students'
+    template_name = 'student_list.html'
+
+class StudentUpdateView(UpdateView):
+    model = Student
+    fields = ['name', 'roll_number', 'course', 'enrollment_date']
+    template_name = 'student_form.html'
+    success_url = reverse_lazy('student_list')
+
+class StudentDeleteView(DeleteView):
+    model = Student
+    template_name = 'student_confirm_delete.html'
+    success_url = reverse_lazy('student_list')
+Step 5: Create templates folder and HTML templates
+Make sure you have this folder structure:
+
+markdown
+Copy code
+myapp/
+  templates/
+    master.html
+    student_form.html
+    student_list.html
+    student_confirm_delete.html
+master.html
+html
+Copy code
+<html>
+<head><title>{% block title %}{% endblock %}</title></head>
+<body bgcolor="lightblue">
+<h1 align="center">Welcome to Our Student Portal</h1>
+{% block content %}{% endblock %}
+<p>Author: Vamsi Krishna</p>
+<p>vamsi@gmail.com</p>
+</body>
+</html>
+student_form.html
+html
+Copy code
+{% extends "master.html" %}
+{% block title %}{% if form.instance.pk %}Update{% else %}Create{% endif %} Student{% endblock %}
+
+{% block content %}
+<h2>{% if form.instance.pk %}Update{% else %}Create{% endif %} Student</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save</button>
+</form>
+{% endblock %}
+student_list.html
+html
+Copy code
+{% extends "master.html" %}
+{% block title %}Student List{% endblock %}
+
+{% block content %}
+<h2>Student List</h2>
+<a href="{% url 'student_create' %}"> Add New Student</a>
+
+{% if students %}
+<table border="1" cellpadding="10" cellspacing="0" style="background-color: white; width: 100%;">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Roll Number</th>
+            <th>Course</th>
+            <th>Enrollment Date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for student in students %}
+        <tr>
+            <td>{{ student.name }}</td>
+            <td>{{ student.roll_number }}</td>
+            <td>{{ student.course }}</td>
+            <td>{{ student.enrollment_date }}</td>
+            <td>
+                <a href="{% url 'student_update' student.id %}"> Edit</a> |
+                <a href="{% url 'student_delete' student.id %}"> Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No students found.</p>
+{% endif %}
+
+{% endblock %}
+
+student_confirm_delete.html
+html
+Copy code
+{% extends "master.html" %}
+{% block title %}Confirm Delete{% endblock %}
+
+{% block content %}
+<h2>Are you sure you want to delete "{{ object }}"?</h2>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Confirm</button>
+</form>
+{% endblock %}
+Step 6: Setup URLs for the app
+File: myapp/urls.py
+
+python
+Copy code
+from django.urls import path
+from .views import (
+    StudentCreateView,
+    StudentListView,
+    StudentUpdateView,
+    StudentDeleteView,
+)
+
+urlpatterns = [
+    path('', StudentListView.as_view(), name='student_list'),
+    path('create/', StudentCreateView.as_view(), name='student_create'),
+    path('update/<int:pk>/', StudentUpdateView.as_view(), name='student_update'),
+    path('delete/<int:pk>/', StudentDeleteView.as_view(), name='student_delete'),
+]
+Step 7: Include myapp URLs in your project urls
+File: myproject/urls.py
+
+python
+Copy code
+from django.contrib import admin
+from django.urls import path, include
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', include('myapp.urls')),
+]
+Step 8: Run the development server
+bash
+Copy code
+python manage.py runserver
+Visit:
+
+List Students: http://127.0.0.1:8000/
+
+Create Student: http://127.0.0.1:8000/create/

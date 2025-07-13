@@ -1,0 +1,192 @@
+A simple E-commerce Product canteen in Django with step-by-step code.
+This will include:
+✅ Project setup
+✅ Product model
+✅ Views (list, detail)
+✅ Templates
+✅ Basic styling
+
+
+✅ Step 1: Create Django Project and App
+
+django-admin startproject college
+cd college
+python manage.py startapp canteen
+
+✅ Step 2: Update settings
+In college/settings.py:
+
+
+INSTALLED_APPS = [
+    ...
+    'canteen',
+]
+✅ Step 3: Define Product Model
+In canteen/models.py:
+
+
+from django.db import models
+
+class Product(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    price = models.DecimalField(max_digits=8, decimal_places=2)
+    image = models.ImageField(upload_to='products/', blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+✅ Step 4: Make migrations
+
+python manage.py makemigrations
+python manage.py migrate
+
+✅ Step 5: Create Admin interface
+In canteen/admin.py:
+
+
+from django.contrib import admin
+from .models import Product
+
+admin.site.register(Product)
+
+
+Create superuser:
+
+python manage.py createsuperuser
+test/123
+
+Run server and add some products:
+python manage.py runserver
+Go to http://127.0.0.1:8000/admin/
+
+✅ Step 6: Create Views
+In canteen/views.py:
+
+
+from django.shortcuts import render, get_object_or_404
+from .models import Product
+
+
+def product_list(request):
+    ob_products = Product.objects.all()
+    return render(request, 'product_list.html', {'products': ob_products})
+
+def product_detail(request, pk):
+    ob_product = get_object_or_404(Product, pk=pk)
+    return render(request, 'product_detail.html', {'product': ob_product})
+
+✅ Step 7a: Add URLs
+In canteen/urls.py (create file):
+
+
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('', views.product_list, name='product_list'),
+    path('product/<int:pk>/', views.product_detail, name='product_detail'),
+]
+
+✅ Step 7b: Add URLs
+In college/urls.py:
+
+
+from django.contrib import admin
+from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', include('canteen.urls')),
+]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+✅ Step 8: Create Templates
+Inside canteen app, create folder: templates/
+
+product_list.html
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Product canteen</title>
+    <style>
+        img { max-width: 150px; }
+        .product { border: 1px solid #ccc; padding: 10px; margin: 10px; display: inline-block; }
+    </style>
+</head>
+<body>
+    <h1>Products</h1>
+    {% for product in products %}
+        <div class="product">
+            {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}">
+            {% endif %}
+            <h2><a href="{% url 'product_detail' product.pk %}">{{ product.name }}</a></h2>
+            <p>${{ product.price }}</p>
+        </div>
+    {% endfor %}
+</body>
+</html>
+
+
+product_detail.html
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ product.name }}</title>
+</head>
+<body>
+    <h1>{{ product.name }}</h1>
+    {% if product.image %}
+        <img src="{{ product.image.url }}" alt="{{ product.name }}">
+    {% endif %}
+    <p>{{ product.description }}</p>
+    <p>Price: Rs{{ product.price }}</p>
+    <a href="/">Back to Products</a>
+</body>
+</html>
+
+
+✅ Step 9: Configure Media files
+In college/settings.py, add:
+
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+✅ Step 10: Test it
+Run server:
+
+
+python manage.py runserver
+
+Visit:
+http://127.0.0.1:8000/         → product list
+
+Click product → product detail
+
+✅ Done! 🎉
+You now have a simple E-commerce product canteen with:
+
+Admin interface
+
+Product listing & detail page
+
+Images
+
+⭐ Next steps (if you want):
+Categories
+
+Search/filter
+
+Cart & checkout
+
+User authentication
+
+Order history
