@@ -1,0 +1,113 @@
+Requirement:
+
+User clicks a button 
+Django view generates a simple PDF 
+Browser opens the PDF so the user can print it.
+
+View logic in views.py
+Button in template
+PDF opens directly to print
+
+We’ll use xhtml2pdf because it’s lightweight and works directly with Django templates.
+
+Step 1: Install required package
+
+pip install xhtml2pdf
+
+Step 2: Create Django view to generate PDF
+views.py
+
+from django.http import HttpResponse
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+
+def generate_pdf(request):
+    # Some sample data to show in PDF
+    context = {
+        'title': 'Test PDF',
+        'message': 'Hello! This PDF was generated from Django.'
+    }
+
+    # Load template and render it with context
+    template = get_template('pdf_template.html')
+    html = template.render(context)
+
+    # Create response as PDF
+    response = HttpResponse(content_type='pdf')
+    response['Content-Disposition'] = 'inline; filename="test.pdf"'
+
+    # Generate PDF
+    pisa_status = pisa.CreatePDF(html, dest=response)
+
+    if pisa_status.err:
+        return HttpResponse('We had some errors while generating PDF')
+    return response
+
+
+Step 3: Add URL pattern
+myproject/urls.py
+
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('generate_pdf/', views.generate_pdf, name='generate_pdf'),
+]
+
+Step 4: Create template to display the "Print PDF" button
+templates/home.html
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PDF Example</title>
+</head>
+<body>
+    <h1>PDF Print Example</h1>
+    <a href="{% url 'generate_pdf' %}" target="_blank">
+        <button>Print PDF</button>
+    </a>
+</body>
+</html>
+
+Step 5: Create the PDF template
+templates/pdf_template.html
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; }
+        h1 { color: darkblue; }
+    </style>
+</head>
+<body>
+    <h1>{{ title }}</h1>
+    <p>{{ message }}</p>
+</body>
+</html>
+✅ Step 6: Create view to render home page (button page)
+views.py (add this too)
+
+from django.shortcuts import render
+
+def home(request):
+    return render(request, 'home.html')
+
+
+✅ Step 7:Update myapp/urls.py:
+
+
+urlpatterns = [
+    path('', views.home, name='home'),
+    path('generate_pdf/', views.generate_pdf, name='generate_pdf'),
+]
+
+Flow:
+Visit: http://127.0.0.1:8000/
+Click the "Print PDF" button.
+Django calls /generate_pdf/, which:
+renders pdf_template.html to HTML,
+converts it to PDF,
+opens PDF in browser → user can print.
