@@ -1,0 +1,36 @@
+<h2>Your Orders</h2>
+
+{% for order in orders %}
+    <div style="margin-bottom: 40px; border: 2px solid #ccc; padding: 10px;width:50%;">
+        <h3>Order #{{ order.id }} - {{ order.created_at }}</h3>
+        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+            {% for product in order.products.all %}
+                <div style="border: 4px solid gray; padding: 10px; text-align: center; width: 160px;">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" width="150" height="150"><br/>
+                    {% endif %}
+                    <strong>{{ product.name }}</strong><br/>
+                    Rs {{ product.price }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <form action="{% url 'delete_order' order.id %}" method="post" style="margin-top: 10px;">
+            {% csrf_token %}
+            <button type="submit" style="background-color: #f44336; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px;">
+                Delete Order
+            </button>
+
+        </form>
+       <form action="{% url 'generate_invoice_pdf' order.id %}" method="get" style="margin-top: 10px;">
+    <button type="submit" style="background-color: #4CAF50; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px;">
+        Download Invoice PDF
+    </button>
+</form>
+
+    </div>
+{% endfor %}
+
+<a href="/" style="display: inline-block; margin-top: 10px; padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 8px;">
+    Back to Products
+</a>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+           
+        }
+
+        table {
+            margin: 0 auto;
+            border-collapse: collapse;
+            font-size: 14px;
+            width: 50%; 
+        }
+
+        th, td {
+            border: 3px solid #ccc;
+            padding: 8px 12px;
+        }
+
+        th {
+            background-color: skyblue;
+        }
+        
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 20px 10px 0;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        .button:hover {
+            background-color: #45a049;
+        }
+
+        .remove-btn {
+            background-color: #e60000;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .remove-btn:hover {
+            background-color: #cc0000;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Your Cart</h2>
+
+    {% if cart_items %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Price (Rs)</th>
+                    <th>Subtotal (Rs)</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cart_items %}
+                <tr>
+                    <td>{{ item.product.name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.product.price }}</td>
+                    <td>{{ item.subtotal }}</td>
+                    <td>
+                        <form action="{% url 'remove_from_cart' item.product.id %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="remove-btn">Remove</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <p><strong>Total: Rs {{ total }}</strong></p>
+
+        <a href="{% url 'place_order' %}" class="button">Place Order</a>
+        <a href="/" class="button"> Continue Shopping</a>
+    {% else %}
+        <p>Your cart is empty.</p>
+        <a href="/" class="button"> Continue Shopping</a>
+    {% endif %}
+
+</body>
+</html>
