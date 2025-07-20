@@ -1,0 +1,10 @@
+<h2>Confirm Delete</h2>
+<p>Are you sure you want to delete Order #{{ order.id }}?</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" style="background-color: #f44336; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px;">
+        Yes, Delete
+    </button>
+    <a href="{% url 'order_history' %}" style="margin-left: 10px;">Cancel</a>
+</form>

@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Payment for Order #{{ order.id }}</title>
+</head>
+<body>
+    <h1>Payment for Order #{{ order.id }}</h1>
+    <p><strong>Total Amount to Pay:</strong> Rs {{ total|floatformat:2 }}</p>
+
+    <p>Scan this QR code to pay:</p>
+    <img src="data:image/png;base64,{{ qr_img_base64 }}" alt="UPI Payment QR Code" width="250" height="250" />
+
+    <p>Or pay manually using UPI ID: <strong>{{ upi_id }}</strong></p>
+</body>
+</html>
