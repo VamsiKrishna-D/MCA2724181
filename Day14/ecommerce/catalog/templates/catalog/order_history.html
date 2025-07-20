@@ -1,0 +1,12 @@
+<h2>Your Orders</h2>
+{% for order in orders %}
+    <div>
+        <h3>Order #{{ order.id }} - {{ order.created_at }}</h3>
+        <ul>
+            {% for product in order.products.all %}
+                <li>{{ product.name }} - Rs{{ product.price }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endfor %}
+<a href="/">Back to products</a>

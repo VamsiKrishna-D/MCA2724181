@@ -1,0 +1,40 @@
+<h2>Your Cart</h2>
+
+{% if cart_items %}
+    <table border="1" cellpadding="10" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Description</th>
+                <th>Quantity</th>
+                <th>Price (Rs)</th>
+                <th>Subtotal (Rs)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in cart_items %}
+                <tr>
+                    <td>{{ item.product.name }}</td>
+                    <td>{{ item.product.description|truncatewords:15 }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.product.price }}</td>
+                    <td>{{ item.subtotal }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="4" style="text-align: right;"><strong>Total:</strong></td>
+                <td><strong>Rs{{ total }}</strong></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <br>
+    <a href="{% url 'place_order' %}" class="button">Place Order</a>
+{% else %}
+    <p>Your cart is empty.</p>
+{% endif %}
+
+<br>
+<a href="/">← Continue Shopping</a>
