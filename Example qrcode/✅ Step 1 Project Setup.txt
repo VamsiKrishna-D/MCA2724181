@@ -1,0 +1,375 @@
+✅ Step 1: Project Setup
+
+django-admin startproject ecommerce
+cd ecommerce
+python manage.py startapp catalog
+✅ Step 2: Add App to settings.py
+In ecommerce/settings.py:
+
+python
+Copy code
+INSTALLED_APPS = [
+    ...
+    'catalog',
+]
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'product_list'
+
+✅ Step 3: Models (catalog/models.py)
+
+from django.db import models
+from django.contrib.auth.models import User
+
+class Category(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+class Product(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    price = models.DecimalField(max_digits=8, decimal_places=2)
+    image = models.ImageField(upload_to='products/', blank=True, null=True)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products', null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+
+class Order(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    products = models.ManyToManyField(Product)
+    created_at = models.DateTimeField(auto_now_add=True)
+✅ Step 4: Migrations
+
+python manage.py makemigrations
+python manage.py migrate
+✅ Step 5: Admin Setup (catalog/admin.py)
+
+from django.contrib import admin
+from .models import Product, Category, Order
+
+admin.site.register(Product)
+admin.site.register(Category)
+admin.site.register(Order)
+Create a superuser:
+
+bash
+Copy code
+python manage.py createsuperuser
+
+✅ Step 6: Views (catalog/views.py)
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login
+from django.views.decorators.http import require_POST
+from .models import Product, Category, Order
+
+def product_list(request):
+    category_id = request.GET.get('category')
+    query = request.GET.get('q')
+    products = Product.objects.all()
+    if category_id:
+        products = products.filter(category_id=category_id)
+    if query:
+        products = products.filter(name__icontains=query)
+    categories = Category.objects.all()
+    return render(request, 'catalog/product_list.html', {'products': products, 'categories': categories})
+
+def product_detail(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    return render(request, 'catalog/product_detail.html', {'product': product})
+
+def add_to_cart(request, pk):
+    cart = request.session.get('cart', [])
+    if pk not in cart:
+        cart.append(pk)
+    request.session['cart'] = cart
+    return redirect('product_list')
+
+def view_cart(request):
+    cart = request.session.get('cart', [])
+    products = Product.objects.filter(pk__in=cart)
+    total = sum(product.price for product in products)
+    return render(request, 'catalog/cart.html', {
+        'products': products,
+        'total': total
+    })
+
+@login_required
+def place_order(request):
+    cart = request.session.get('cart', [])
+    if cart:
+        order = Order.objects.create(user=request.user)
+        order.products.set(cart)
+        order.save()
+        request.session['cart'] = []
+        return redirect('order_history')
+    return redirect('product_list')
+
+@require_POST
+def add_to_cart(request, pk):
+    cart = request.session.get('cart', {})
+    quantity = int(request.POST.get('quantity', 1))
+
+    if str(pk) in cart:
+        cart[str(pk)] += quantity
+    else:
+        cart[str(pk)] = quantity
+
+    request.session['cart'] = cart
+    return redirect('product_list')
+
+
+@login_required
+def order_history(request):
+    orders = Order.objects.filter(user=request.user)
+    return render(request, 'catalog/order_history.html', {'orders': orders})
+
+def signup(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('product_list')
+    else:
+        form = UserCreationForm()
+    return render(request, 'catalog/signup.html', {'form': form})
+✅ Step 7: URLs
+catalog/urls.py
+
+from django.urls import path
+from . import views
+from django.contrib.auth import views as auth_views
+
+urlpatterns = [
+    path('', views.product_list, name='product_list'),
+    path('product/<int:pk>/', views.product_detail, name='product_detail'),
+    path('signup/', views.signup, name='signup'),
+    path('login/', auth_views.LoginView.as_view(template_name='catalog/login.html'), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(next_page='product_list'), name='logout'),
+    path('add-to-cart/<int:pk>/', views.add_to_cart, name='add_to_cart'),
+    path('cart/', views.view_cart, name='view_cart'),
+    path('place-order/', views.place_order, name='place_order'),
+    path('order-history/', views.order_history, name='order_history'),
+    path('login/', auth_views.LoginView.as_view(template_name='catalog/login.html',redirect_authenticated_user=True), name='login'),
+path('add-to-cart/<int:pk>/', views.add_to_cart, name='add_to_cart'),
+
+]
+
+ecommerce/urls.py
+python
+Copy code
+
+
+from django.contrib import admin
+from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', include('catalog.urls')),
+]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+✅ Step 8: Templates
+Create folder catalog/templates/catalog/ and add:
+
+product_list.html
+
+<h1>Products</h1>
+
+<form method="get">
+    <input type="text" name="q" placeholder="Search..." value="{{ request.GET.q }}">
+    {% if request.GET.category %}
+        <input type="hidden" name="category" value="{{ request.GET.category }}">
+    {% endif %}
+    <button type="submit">Search</button>
+</form>
+
+<h3>Filter by Category:</h3>
+<ul>
+    <li><a href="/">All</a></li>
+    {% for category in categories %}
+        <li><a href="?category={{ category.id }}">{{ category.name }}</a></li>
+    {% endfor %}
+</ul>
+
+{% for product in products %}
+    <div class="product">
+        {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" width="150">
+        {% endif %}
+        <h2><a href="{% url 'product_detail' product.pk %}">{{ product.name }}</a></h2>
+        <p>Rs{{ product.price }}</p>
+    </div>
+{% endfor %}
+
+<a href="{% url 'view_cart' %}">View Cart</a> |
+<a href="{% url 'order_history' %}">Order History</a> |
+{% if user.is_authenticated %}
+    <a href="{% url 'logout' %}">Logout</a>
+{% else %}
+    <a href="{% url 'login' %}">Login</a> | <a href="{% url 'signup' %}">Signup</a>
+{% endif %}
+
+
+{% for product in products %}
+    <div class="product">
+        {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" width="150">
+        {% endif %}
+        <h2><a href="{% url 'product_detail' product.pk %}">{{ product.name }}</a></h2>
+        <p>Rs{{ product.price }}</p>
+        {% if user.is_authenticated %}
+           
+<form action="{% url 'add_to_cart' product.pk %}" method="post" style="margin-top: 10px;">
+    {% csrf_token %}
+    <label for="quantity-{{ product.pk }}">Qty:</label>
+    <input type="number" name="quantity" id="quantity-{{ product.pk }}" value="1" min="1" style="width: 60px;">
+    <button type="submit">Add to Cart</button>
+</form>
+
+
+
+        {% else %}
+            <a href="{% url 'login' %}?next={% url 'add_to_cart' product.pk %}">Login to Add to Cart</a>
+        {% endif %}
+    </div>
+{% endfor %}
+
+
+product_detail.html
+html
+Copy code
+
+
+<h1>{{ product.name }}</h1>
+{% if product.image %}
+    <img src="{{ product.image.url }}" alt="{{ product.name }}">
+{% endif %}
+<p>{{ product.description }}</p>
+<p>Price: Rs{{ product.price }}</p>
+<a href="{% url 'add_to_cart' product.pk %}">Add to Cart</a>
+<br><a href="/">Back to Products</a>
+
+signup.html
+html
+Copy code
+
+<h2>Signup</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Sign up</button>
+</form>
+<a href="{% url 'login' %}">Login</a>
+
+login.html
+html
+Copy code
+
+<h2>Login</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Login</button>
+</form>
+
+{% if next %}
+    <input type="hidden" name="next" value="{{ next }}">
+{% endif %}
+<p>Don't have an account? <a href="{% url 'signup' %}">Sign up</a></p>
+
+
+cart.html
+
+<h2>Your Cart</h2>
+
+{% if products %}
+    <table border="1" cellpadding="10" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Description</th>
+                <th>Price (Rs)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+                <tr>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.description|truncatewords:15 }}</td>
+                    <td>{{ product.price }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="2" style="text-align: right;"><strong>Total:</strong></td>
+                <td><strong>Rs{{ total }}</strong></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <br>
+    <a href="{% url 'place_order' %}" class="button">Place Order</a>
+{% else %}
+    <p>Your cart is empty.</p>
+{% endif %}
+
+<br>
+<a href="/">← Continue Shopping</a>
+
+order_history.html
+html
+Copy code
+
+<h2>Your Orders</h2>
+{% for order in orders %}
+    <div>
+        <h3>Order #{{ order.id }} - {{ order.created_at }}</h3>
+        <ul>
+            {% for product in order.products.all %}
+                <li>{{ product.name }} - Rs{{ product.price }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endfor %}
+<a href="/">Back to products</a>
+
+✅ Optional: Logout Confirmation Page
+You can add a simple logout confirmation page by creating a new template logged_out.html:
+
+
+<h2>You have been logged out.</h2>
+<a href="{% url 'login' %}">Login again</a> |
+<a href="{% url 'product_list' %}">Back to Products</a>
+
+✅ Final Check
+Ensure you're using {% load static %} at the top of each HTML template if you're using static CSS/JS.
+
+Restart the server with:
+
+bash
+Copy
+Edit
+python manage.py runserver
+
+✅ Step 9: Run Server and Test
+bash
+Copy code
+python manage.py runserver
+Visit: http://127.0.0.1:8000/ → Product List
+
+Add products via admin panel: /admin/
+
+Test login,

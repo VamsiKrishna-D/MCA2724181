@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .invoice-box {
+            max-width: 700px;
+            margin: auto;
+            padding: 30px;
+            border: 1px solid #eee;
+            font-size: 14px;
+            line-height: 20px;
+            color: #555;
+        }
+        table { width: 100%; line-height: inherit; text-align: left; border-collapse: collapse; }
+        table td { padding: 5px; vertical-align: top; }
+        table th { background: #eee; border-bottom: 1px solid #ddd; font-weight: bold; }
+        .total-row td { border-top: 2px solid #eee; font-weight: bold; }
+        img.qr-code { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="invoice-box">
+        <h2>Invoice for Order #{{ order.id }}</h2>
+        <p>Date: {{ order.created_at|date:"d M Y" }}</p>
+
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Price (Rs)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.price }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td>Subtotal</td>
+                    <td>Rs {{ subtotal|floatformat:2 }}</td>
+                </tr>
+                <tr>
+                    <td>CGST @ 9%</td>
+                    <td>Rs {{ cgst|floatformat:2 }}</td>
+                </tr>
+                <tr>
+                    <td>SGST @ 9%</td>
+                    <td>Rs {{ sgst|floatformat:2 }}</td>
+                </tr>
+                <tr>
+                    <td>IGST</td>
+                    <td>Rs {{ igst|floatformat:2 }}</td>
+                </tr>
+                <tr class="total-row">
+                    <td>Total</td>
+                    <td>Rs {{ total|floatformat:2 }}</td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <h3>Scan to Pay</h3>
+        <p>UPI ID: yourupiid@bank</p>
+        <img class="qr-code" src="data:image/png;base64,{{ qr_code }}" width="200" height="200" alt="QR Code">
+
+        <p>Thank you for your purchase!</p>
+    </div>
+</body>
+</html>
